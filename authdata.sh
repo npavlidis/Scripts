@@ -55,5 +55,4 @@ done
 
 rm -f /tmp/ISO-3166-1.txt
 rm -f $OUTFILE2
-mv $OUTFILE /home/npavlidis/Downloads/data.csv
-chown npavlidis.npavlidis /home/npavlidis/Downloads/data.csv
+mv $OUTFILE data.csv
