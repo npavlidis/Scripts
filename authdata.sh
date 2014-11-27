@@ -1,6 +1,5 @@
 #!/bin/bash
-# primitive data collector v.1 (run as root)
-#
+# (run as root)
 
 OUTFILE=`mktemp -p /tmp authdata.XXX`
 OUTFILE2=`mktemp -p /tmp authdata2.XXX`
