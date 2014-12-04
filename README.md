@@ -6,4 +6,4 @@ authdata.sh - get failed logons from auth.log and find IP geolocation -> output 
 
 firewall.sh - the simplest iptables script you can add in your /etc/rc.local
 
-enumerator.sh - SMB snumerator for the th lazy pentester
+enumerator.sh - SMB snumerator for the lazy pentester
