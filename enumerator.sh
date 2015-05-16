@@ -75,7 +75,7 @@ for snmpip in $(grep ^161/udp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2
 			XITVAL=`echo $?`
 			if [ $XITVAL = 0 ]; then
 				sleep 1
-				snmpcheck -D -c $community -v2 -t $snmpip > $OUTPATH/$snmpip/snmpcheck-$community.txt 2>&1
+				snmpcheck -c $community -v2 -t $snmpip > $OUTPATH/$snmpip/snmpcheck-$community.txt 2>&1
 			fi
 		done
 	fi
