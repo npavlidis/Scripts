@@ -65,15 +65,17 @@ for snmpip in $(grep ^161/udp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2
 	echo "run" >> $MSFSNMPRC
 	echo "exit" >> $MSFSNMPRC
 	msfconsole -n -r $MSFSNMPRC > $MSFSNMPOUT 2>&1
-	grep "LOGIN SUCCESSFUL" $MSFSNMPOUT > $OUTPATH/$snmpip/msf-snmp-community.txt 2>&1
+	grep "LOGIN SUCCESSFUL" $MSFSNMPOUT | cut -d ' ' -f4- > $OUTPATH/$snmpip/msf-snmp-community.txt 2>&1
 	XITVAL=`echo $?`
 	if [ $XITVAL = 0 ]; then
-		for community in $(grep "LOGIN SUCCESSFUL" $OUTPATH/$snmpip/msf-snmp-community.txt | cut -d ":" -f 3 | sed 's/^[ \t]*//'); do
-			snmpcheck -c $community -v 1 -t $snmpip > $OUTPATH/$snmpip/msf-snmp.txt 2>&1
-			grep "Error: No response" $OUTPATH/$snmpip/msf-snmp.txt > /dev/null 2>&1
+		for community in $(grep "LOGIN SUCCESSFUL" $OUTPATH/$snmpip/msf-snmp-community.txt | cut -d ":" -f 2 | sed 's/^[ \t]*//'); do
+			sleep 1
+			snmpcheck -c $community -v1 -t $snmpip > $OUTPATH/$snmpip/snmpcheck-$community.txt 2>&1
+			grep "Error: No response" $OUTPATH/$snmpip/snmpcheck-$community.txt > /dev/null 2>&1
 			XITVAL=`echo $?`
 			if [ $XITVAL = 0 ]; then
-				snmpcheck -c $community -v 2 -t $snmpip > $OUTPATH/$snmpip/msf-snmp.txt 2>&1
+				sleep 1
+				snmpcheck -D -c $community -v2 -t $snmpip > $OUTPATH/$snmpip/snmpcheck-$community.txt 2>&1
 			fi
 		done
 	fi
