@@ -46,13 +46,13 @@ echo -e " [ \e[32mDONE \e[39m]"
 # SMTP Enumeration
 echo -n -e "Starting SMTP Enumeration..."
 for smtpip in $(grep ^25/tcp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2); do
-	nmap --script smtp-enum-users.nse --script smtp-commands.nse --script smtp-open-relay.nse -p 25 $smtpip -oN $OUTPATH/$smtpip/nmap-smtp25.txt > /dev/null 2>&1
+	nmap -Pn --script smtp-enum-users.nse --script smtp-commands.nse --script smtp-open-relay.nse -p 25 $smtpip -oN $OUTPATH/$smtpip/nmap-smtp25.txt > /dev/null 2>&1
 done
 for smtpip in $(grep ^465/tcp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2); do
-        nmap --script smtp-enum-users.nse --script smtp-commands.nse --script smtp-open-relay.nse -p 465 $smtpip -oN $OUTPATH/$smtpip/nmap-smtp465.txt > /dev/null 2>&1
+        nmap -Pn --script smtp-enum-users.nse --script smtp-commands.nse --script smtp-open-relay.nse -p 465 $smtpip -oN $OUTPATH/$smtpip/nmap-smtp465.txt > /dev/null 2>&1
 done
 for smtpip in $(grep ^587/tcp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2); do
-        nmap --script smtp-enum-users.nse --script smtp-commands.nse --script smtp-open-relay.nse -p 587 $smtpip -oN $OUTPATH/$smtpip/nmap-smtp587.txt > /dev/null 2>&1
+        nmap -Pn --script smtp-enum-users.nse --script smtp-commands.nse --script smtp-open-relay.nse -p 587 $smtpip -oN $OUTPATH/$smtpip/nmap-smtp587.txt > /dev/null 2>&1
 done    
 echo -e " [ \e[32mDONE \e[39m]"
 
@@ -86,21 +86,21 @@ echo -e " [ \e[32mDONE \e[39m]"
 # FTP Enumeration
 echo -n -e "Starting FTP Enumeration..."
 for ftpip in $(grep ^21/tcp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2); do
-	nmap --script ftp-anon.nse --script-args ftp-anon.maxlist=-1 -p21 $ftpip -oN $OUTPATH/$ftpip/nmap-ftp.txt > /dev/null 2>&1
+	nmap -Pn --script ftp-anon.nse --script-args ftp-anon.maxlist=-1 -p21 $ftpip -oN $OUTPATH/$ftpip/nmap-ftp.txt > /dev/null 2>&1
 done
 echo -e " [ \e[32mDONE \e[39m]"
 
 # Finger Enumeration
 echo -n -e "Starting Finger Enumeration..."
 for fingerip in $(grep ^79/tcp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2); do
-	nmap --script finger -p79 $fingerip -oN $OUTPATH/$fingerip/nmap-finger.txt > /dev/null 2>&1
+	nmap -Pn --script finger -p79 $fingerip -oN $OUTPATH/$fingerip/nmap-finger.txt > /dev/null 2>&1
 done
 echo -e " [ \e[32mDONE \e[39m]"
 
 # NFS Enumeration
 echo -n -e "Starting NFS Enumeration..."
 for nfsip in $(grep ^111/tcp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2); do
-	nmap --script nfs-showmount --script nfs-ls -p111 $nfsip -oN $OUTPATH/$nfsip/nmap-nfs.txt > /dev/null 2>&1
+	nmap -Pn --script nfs-showmount --script nfs-ls -p111 $nfsip -oN $OUTPATH/$nfsip/nmap-nfs.txt > /dev/null 2>&1
 done
 echo -e " [ \e[32mDONE \e[39m]"
 
@@ -109,7 +109,7 @@ echo -n -e "Starting SMB Enumeration..."
 grep ^445/tcp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2 > $SMBTARGETS
 grep ^139/tcp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2 >> $SMBTARGETS
 for smbip in $(sort $SMBTARGETS| uniq); do
-	nmap --script smb-check-vulns.nse -p445,139 $smbip -oN $OUTPATH/$smbip/nmap-smb.txt > /dev/null 2>&1
+	nmap -Pn --script smb-check-vulns.nse --script-args unsafe=1 -p445,139 $smbip -oN $OUTPATH/$smbip/nmap-smb.txt > /dev/null 2>&1
 	enum4linux -a -v > $OUTPATH/$smbip/enum4linux.txt 2>&1
 done
 echo -e " [ \e[32mDONE \e[39m]"
@@ -117,7 +117,7 @@ echo -e " [ \e[32mDONE \e[39m]"
 # TFTP Enumeration
 echo -n -e "Starting TFTP Enumeration..."
 for tftpip in $(grep ^69/udp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2); do
-	nmap -sU -p 69 --script tftp-enum.nse $tftpip -oN $OUTPATH/$tftpip/nmap-tftp.txt > /dev/null 2>&1
+	nmap -Pn -sU -p 69 --script tftp-enum.nse $tftpip -oN $OUTPATH/$tftpip/nmap-tftp.txt > /dev/null 2>&1
 done
 echo -e " [ \e[32mDONE \e[39m]"
 
@@ -128,7 +128,7 @@ for httpipport in $(grep http $OUTPATH/* -R | grep -v -i rpc | grep -v -i upnp |
 	httpip=`echo $httpipport | cut -d ":" -f1`
 	httpport=`echo $httpipport | cut -d ":" -f2`
 	cutycapt --url=http://$httpip:$httpport/ --out=$OUTPATH/$httpip/web-port-$httpport.png --out-format=png --javascript=on --java=on
-	nmap -p $httpport --script http-headers --script http-methods --script http-title --script http-auth-finder --script http-enum $httpip -oN $OUTPATH/$httpip/web-port-$httpport/nmap-http.txt > /dev/null 2>&1
+	nmap -Pn -p $httpport --script http-headers --script http-methods --script http-title --script http-auth-finder --script http-enum $httpip -oN $OUTPATH/$httpip/web-port-$httpport/nmap-http.txt > /dev/null 2>&1
 done
 echo -e " [ \e[32mDONE \e[39m]"
 # Thats all folks!
