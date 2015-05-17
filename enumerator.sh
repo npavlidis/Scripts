@@ -11,7 +11,8 @@ OUTFILE2=`mktemp -p /tmp enumerator2.XXX`
 MASTERTARGETLIST=`mktemp -p /tmp enumerator3.XXX`
 SMBTARGETS=`mktemp -p /tmp enumerator4.XXX`
 MSFSNMPRC=`mktemp -p /tmp enumerator5.XXX`
-MSFSNMPOUT=`mktemp -p /tmp enumerator5.XXX`
+MSFSNMPOUT=`mktemp -p /tmp enumerator6.XXX`
+HTTPTARGETS=`mktemp -p /tmp enumerator7.XXX`
 mkdir -p $OUTPATH
 
 # Find targets
@@ -121,14 +122,25 @@ for tftpip in $(grep ^69/udp $OUTPATH/* -R | grep -v filtered | cut -d "/" -f 2)
 done
 echo -e " [ \e[32mDONE \e[39m]"
 
-
 # HTTP Enumeration
 echo -n -e "Starting HTTP Enumeration..."
-for httpipport in $(grep http $OUTPATH/* -R | grep -v -i rpc | grep -v -i upnp | grep -v ssl | grep open | awk -F '[/:]' '{print $2":"$4}'); do 
+grep http $OUTPATH/*/nmap* -R | grep -v -i rpc | grep -v -i upnp | grep -v "\s ssl" | grep open | awk -F '[/:]' '{print $2":"$4}' > $HTTPTARGETS 2>&1
+grep "80/tcp" $OUTPATH/*/nmap* -R | grep open | awk -F '[/:]' '{print $2":"$4}' >> $HTTPTARGETS 2>&1
+for httpipport in $(sort $HTTPTARGETS | uniq); do 
 	httpip=`echo $httpipport | cut -d ":" -f1`
 	httpport=`echo $httpipport | cut -d ":" -f2`
-	cutycapt --url=http://$httpip:$httpport/ --out=$OUTPATH/$httpip/web-port-$httpport.png --out-format=png --javascript=on --java=on
-	nmap -Pn -p $httpport --script http-headers --script http-methods --script http-title --script http-auth-finder --script http-enum $httpip -oN $OUTPATH/$httpip/web-port-$httpport/nmap-http.txt > /dev/null 2>&1
+	/opt/cutycapt/CutyCapt --url=http://$httpip:$httpport/ --out=$OUTPATH/$httpip/web-port-$httpport.png --out-format=png --java=on --min-width=1680 --min-height=1050
+	nmap -Pn -p $httpport --script http-headers --script http-methods --script http-title --script http-auth-finder --script http-enum $httpip -oN $OUTPATH/$httpip/web-port-$httpport-nmap-http.txt > /dev/null 2>&1
+	echo $httpipport >> $HTTPTARGETS
+done
+echo -e " [ \e[32mDONE \e[39m]"
+
+# HTTPS Enumeration
+echo -n -e "Starting HTTPS Enumeration..."
+for httpsipport in $(grep ssl $OUTPATH/*/nmap* -R | grep -v '\s http' | grep open | cut -d ' ' -f1-8 | awk -F '[/:]' '{print $2":"$4}'); do
+	httpsip=`echo $httpsipport | cut -d ":" -f1`
+	httpsport=`echo $httpsipport | cut -d ":" -f2`
+	/opt/cutycapt/CutyCapt --insecure --url=https://$httpsip:$httpsport/ --out=$OUTPATH/$httpsip/web-port-$httpsport.png --out-format=png --java=on --min-width=1680 --min-height=1050 
 done
 echo -e " [ \e[32mDONE \e[39m]"
 # Thats all folks!
@@ -139,4 +151,5 @@ rm -f $OUTFILE2
 rm -f $MASTERTARGETLIST
 rm -f $MSFSNMPRC
 rm -f $MSFSNMPOUT
+rm -f $HTTPTARGETS
 echo -e " [ \e[32mDONE \e[39m]"
