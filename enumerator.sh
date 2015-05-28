@@ -146,7 +146,9 @@ for httpsipport in $(grep ssl $OUTPATH/*/nmap* -R | grep -v '\s http' | grep ope
 	httpsport=`echo $httpsipport | cut -d ":" -f2`
 	/opt/cutycapt/CutyCapt --insecure --url=https://$httpsip:$httpsport/ --out=$OUTPATH/$httpsip/web-port-$httpsport.png --out-format=png --java=on --min-width=1680 --min-height=1050 
 	nikto -nolookup -nointeractive -ask no -ssl -Format txt -output $OUTPATH/$httpsip/web-port-$httpsport-nikto.txt -port $httpsport -host $httpsip > /dev/null 2>&1
-	sslscan --show-certificate --no-colour $httpsip:$httpsport > $OUTPATH/$httpsip/sslscan-$httpsport.txt 2>&1
+	cd $OUTPATH/$httpsip/
+	tlssled $httpsip $httpsport > /dev/null 2>&1
+	cd ../../
 done
 echo -e " [ \e[32mDONE \e[39m]"
 # Thats all folks!
