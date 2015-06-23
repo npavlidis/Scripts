@@ -114,7 +114,7 @@ grep ^445/tcp $OUTPATH/* -R | grep -v filtered | grep -E -o "([0-9]{1,3}[\.]){3}
 grep ^139/tcp $OUTPATH/* -R | grep -v filtered | grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" >> $SMBTARGETS
 for smbip in $(sort $SMBTARGETS| uniq); do
 	nmap -Pn --reason -vvv -n --script smb-check-vulns.nse --script-args unsafe=1 -p445,139 $smbip -oN $OUTPATH/$smbip/nmap-smb.txt > /dev/null 2>&1
-	enum4linux -a -v > $OUTPATH/$smbip/enum4linux.txt 2>&1
+	enum4linux -a -v $smbip > $OUTPATH/$smbip/enum4linux.txt 2>&1
 done
 echo -e " [ \e[32mDONE \e[39m]"
 
